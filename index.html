@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .miku-toggle {
+            background: linear-gradient(45deg, #39c5bb, #01b6ad);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .miku-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #01b6ad, #39c5bb);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            flex: 1;
+        }
+
+        .score {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            border: 5px solid #fff;
+            font-size: 4rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+
+        .click-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .click-button:active {
+            transform: scale(0.95);
+        }
+
+        .upgrades {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .upgrade {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .upgrade:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .upgrade button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .upgrade button:hover:not(:disabled) {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .upgrade button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .stats {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        .miku-theme {
+            background: linear-gradient(135deg, #39c5bb 0%, #01b6ad 50%, #00a19c 100%);
+        }
+
+        .miku-theme .game-container {
+            background: rgba(57, 197, 187, 0.2);
+            border: 1px solid rgba(57, 197, 187, 0.3);
+        }
+
+        .miku-theme .click-button {
+            background: linear-gradient(45deg, #39c5bb, #01ddd6);
+            animation: mikuGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes mikuGlow {
+            0% { box-shadow: 0 10px 25px rgba(57, 197, 187, 0.3); }
+            100% { box-shadow: 0 10px 25px rgba(57, 197, 187, 0.6), 0 0 30px rgba(57, 197, 187, 0.4); }
+        }
+
+        .miku-theme .upgrade {
+            background: rgba(57, 197, 187, 0.15);
+            border: 1px solid rgba(57, 197, 187, 0.3);
+        }
+
+        .miku-theme .upgrade button {
+            background: linear-gradient(45deg, #39c5bb, #01b6ad);
+        }
+
+        .miku-theme .upgrade button:hover:not(:disabled) {
+            background: linear-gradient(45deg, #01b6ad, #39c5bb);
+        }
+
+        .miku-theme .stat {
+            background: rgba(57, 197, 187, 0.15);
+            border: 1px solid rgba(57, 197, 187, 0.3);
+        }
+
+        .miku-theme .score {
+            color: #01ddd6;
+        }
+
+        .miku-theme .click-effect {
+            color: #01ddd6;
+        }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 id="gameTitle">🍪 Cookie Clicker</h1>
+            <button id="mikuToggle" class="miku-toggle">🎤 Mode Miku</button>
+        </div>
+        
+        <div class="score">
+            <span id="scoreLabel">Cookies</span>: <span id="score">0</span>
+        </div>
+        
+        <div class="click-button" id="clickButton">
+            🍪
+        </div>
+        
+        <div class="upgrades">
+            <div class="upgrade" id="upgrade1">
+                <h3 id="upgrade1Title">🖱️ Meilleur Curseur</h3>
+                <p id="upgrade1Desc">+1 cookie par clic</p>
+                <p>Coût: <span id="cursorCost">10</span> <span id="currency1">cookies</span></p>
+                <button id="buyCursor">Acheter</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade2">
+                <h3 id="upgrade2Title">👵 Grand-mère</h3>
+                <p id="upgrade2Desc">+1 cookie/seconde</p>
+                <p>Coût: <span id="grandmaCost">100</span> <span id="currency2">cookies</span></p>
+                <button id="buyGrandma">Acheter</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade3">
+                <h3 id="upgrade3Title">🏭 Usine</h3>
+                <p id="upgrade3Desc">+5 cookies/seconde</p>
+                <p>Coût: <span id="factoryCost">1000</span> <span id="currency3">cookies</span></p>
+                <button id="buyFactory">Acheter</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade4">
+                <h3 id="upgrade4Title">🌟 Boost x2</h3>
+                <p id="upgrade4Desc">Double la production pendant 30s</p>
+                <p>Coût: <span id="boostCost">500</span> <span id="currency4">cookies</span></p>
+                <button id="buyBoost">Acheter</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <h4 id="statLabel1">Cookies par clic</h4>
+                <p id="clickPower">1</p>
+            </div>
+            <div class="stat">
+                <h4 id="statLabel2">Cookies par seconde</h4>
+                <p id="cps">0</p>
+            </div>
+            <div class="stat">
+                <h4>Total cliqué</h4>
+                <p id="totalClicks">0</p>
+            </div>
+            <div class="stat">
+                <h4>Boost actif</h4>
+                <p id="boostStatus">Non</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            score: 0,
+            clickPower: 1,
+            cps: 0,
+            totalClicks: 0,
+            upgrades: {
+                cursor: { count: 0, cost: 10, power: 1 },
+                grandma: { count: 0, cost: 100, cps: 1 },
+                factory: { count: 0, cost: 1000, cps: 5 },
+                boost: { active: false, timeLeft: 0, cost: 500 }
+            },
+            isMikuMode: false
+        };
+
+        // Thèmes
+        const themes = {
+            cookie: {
+                title: "🍪 Cookie Clicker",
+                buttonText: "🎤 Mode Miku",
+                scoreLabel: "Cookies",
+                currency: "cookies",
+                clickEmoji: "🍪",
+                upgrades: [
+                    { title: "🖱️ Meilleur Curseur", desc: "+1 cookie par clic" },
+                    { title: "👵 Grand-mère", desc: "+1 cookie/seconde" },
+                    { title: "🏭 Usine", desc: "+5 cookies/seconde" },
+                    { title: "🌟 Boost x2", desc: "Double la production pendant 30s" }
+                ],
+                stats: ["Cookies par clic", "Cookies par seconde"]
+            },
+            miku: {
+                title: "🎤 Miku Clicker",
+                buttonText: "🍪 Mode Cookie",
+                scoreLabel: "Notes",
+                currency: "notes",
+                clickEmoji: "🎵",
+                upgrades: [
+                    { title: "🎶 Microphone Pro", desc: "+1 note par clic" },
+                    { title: "🎸 Guitariste", desc: "+1 note/seconde" },
+                    { title: "🎹 Studio", desc: "+5 notes/seconde" },
+                    { title: "🌟 Concert Boost", desc: "Double la production pendant 30s" }
+                ],
+                stats: ["Notes par clic", "Notes par seconde"]
+            }
+        };
+
+        // Éléments DOM
+        const body = document.body;
+        const gameTitle = document.getElementById('gameTitle');
+        const mikuToggle = document.getElementById('mikuToggle');
+        const scoreElement = document.getElementById('score');
+        const scoreLabel = document.getElementById('scoreLabel');
+        const clickButton = document.getElementById('clickButton');
+        const clickPowerElement = document.getElementById('clickPower');
+        const cpsElement = document.getElementById('cps');
+        const totalClicksElement = document.getElementById('totalClicks');
+        const boostStatusElement = document.getElementById('boostStatus');
+
+        // Boutons d'amélioration
+        const buyCursorBtn = document.getElementById('buyCursor');
+        const buyGrandmaBtn = document.getElementById('buyGrandma');
+        const buyFactoryBtn = document.getElementById('buyFactory');
+        const buyBoostBtn = document.getElementById('buyBoost');
+
+        // Éléments de coût
+        const cursorCostElement = document.getElementById('cursorCost');
+        const grandmaCostElement = document.getElementById('grandmaCost');
+        const factoryCostElement = document.getElementById('factoryCost');
+        const boostCostElement = document.getElementById('boostCost');
+
+        // Fonction pour jouer le son du boost Miku
+        function playMikuBoostSound() {
+            if (!gameState.isMikuMode) return;
+            
+            // Essayer de jouer le fichier miku-boost.mp3 local
+            const audio = new Audio('miku-boost.mp3');
+            audio.volume = 0.7;
+            
+            // Si le fichier existe, le jouer, sinon utiliser le son synthétique
+            audio.play().catch(() => {
+                console.log('Fichier miku-boost.mp3 non trouvé, utilisation du son synthétique');
+                playSyntheticMikuSound();
+            });
+        }
+
+        function playSyntheticMikuSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Créer une mélodie synthétique inspirée de Miku
+            const notes = [523.25, 587.33, 659.25, 698.46, 783.99]; // Do, Ré, Mi, Fa, Sol
+            let time = audioContext.currentTime;
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(freq, time);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, time);
+                gainNode.gain.linearRampToValueAtTime(0.3, time + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+                
+                oscillator.start(time);
+                oscillator.stop(time + 0.3);
+                
+                time += 0.15;
+            });
+        }
+        mikuToggle.addEventListener('click', function() {
+            gameState.isMikuMode = !gameState.isMikuMode;
+            updateTheme();
+        });
+
+        function updateTheme() {
+            const theme = gameState.isMikuMode ? themes.miku : themes.cookie;
+            
+            // Appliquer la classe de thème
+            if (gameState.isMikuMode) {
+                body.classList.add('miku-theme');
+            } else {
+                body.classList.remove('miku-theme');
+            }
+            
+            // Mettre à jour les textes
+            gameTitle.textContent = theme.title;
+            mikuToggle.textContent = theme.buttonText;
+            scoreLabel.textContent = theme.scoreLabel;
+            clickButton.textContent = theme.clickEmoji;
+            
+            // Mettre à jour les améliorations
+            document.getElementById('upgrade1Title').textContent = theme.upgrades[0].title;
+            document.getElementById('upgrade1Desc').textContent = theme.upgrades[0].desc;
+            document.getElementById('upgrade2Title').textContent = theme.upgrades[1].title;
+            document.getElementById('upgrade2Desc').textContent = theme.upgrades[1].desc;
+            document.getElementById('upgrade3Title').textContent = theme.upgrades[2].title;
+            document.getElementById('upgrade3Desc').textContent = theme.upgrades[2].desc;
+            document.getElementById('upgrade4Title').textContent = theme.upgrades[3].title;
+            document.getElementById('upgrade4Desc').textContent = theme.upgrades[3].desc;
+            
+            // Mettre à jour les devises
+            document.getElementById('currency1').textContent = theme.currency;
+            document.getElementById('currency2').textContent = theme.currency;
+            document.getElementById('currency3').textContent = theme.currency;
+            document.getElementById('currency4').textContent = theme.currency;
+            
+            // Mettre à jour les statistiques
+            document.getElementById('statLabel1').textContent = theme.stats[0];
+            document.getElementById('statLabel2').textContent = theme.stats[1];
+        }
+
+        // Fonction de clic principal
+        clickButton.addEventListener('click', function(e) {
+            const effectivePower = gameState.upgrades.boost.active ? 
+                gameState.clickPower * 2 : gameState.clickPower;
+            
+            gameState.score += effectivePower;
+            gameState.totalClicks++;
+            
+            // Effet visuel de clic
+            createClickEffect(e, effectivePower);
+            clickButton.classList.add('pulse');
+            setTimeout(() => clickButton.classList.remove('pulse'), 300);
+            
+            updateDisplay();
+        });
+
+        // Fonction pour créer l'effet visuel du clic
+        function createClickEffect(e, value) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = `+${value}`;
+            effect.style.left = e.clientX + 'px';
+            effect.style.top = e.clientY + 'px';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 1000);
+        }
+
+        // Fonctions d'achat d'améliorations
+        buyCursorBtn.addEventListener('click', () => buyUpgrade('cursor'));
+        buyGrandmaBtn.addEventListener('click', () => buyUpgrade('grandma'));
+        buyFactoryBtn.addEventListener('click', () => buyUpgrade('factory'));
+        buyBoostBtn.addEventListener('click', () => buyBoost());
+
+        function buyUpgrade(type) {
+            const upgrade = gameState.upgrades[type];
+            if (gameState.score >= upgrade.cost) {
+                gameState.score -= upgrade.cost;
+                upgrade.count++;
+                
+                if (type === 'cursor') {
+                    gameState.clickPower += upgrade.power;
+                } else {
+                    gameState.cps += upgrade.cps;
+                }
+                
+                // Augmenter le coût
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                
+                updateDisplay();
+            }
+        }
+
+        function buyBoost() {
+            if (gameState.score >= gameState.upgrades.boost.cost && !gameState.upgrades.boost.active) {
+                gameState.score -= gameState.upgrades.boost.cost;
+                gameState.upgrades.boost.active = true;
+                gameState.upgrades.boost.timeLeft = 30;
+                
+                // Jouer le son Miku si on est en mode Miku
+                playMikuBoostSound();
+                
+                // Augmenter le coût du boost pour le prochain achat
+                gameState.upgrades.boost.cost = Math.floor(gameState.upgrades.boost.cost * 2);
+                
+                // Effet visuel pour indiquer que le boost est actif
+                clickButton.style.animation = 'mikuGlow 1s ease-in-out infinite alternate';
+                
+                updateDisplay();
+            }
+        }
+
+        // Mise à jour de l'affichage
+        function updateDisplay() {
+            scoreElement.textContent = Math.floor(gameState.score);
+            clickPowerElement.textContent = gameState.clickPower;
+            cpsElement.textContent = gameState.cps;
+            totalClicksElement.textContent = gameState.totalClicks;
+            
+            // Mise à jour des coûts
+            cursorCostElement.textContent = gameState.upgrades.cursor.cost;
+            grandmaCostElement.textContent = gameState.upgrades.grandma.cost;
+            factoryCostElement.textContent = gameState.upgrades.factory.cost;
+            boostCostElement.textContent = gameState.upgrades.boost.cost;
+            
+            // Mise à jour des boutons
+            buyCursorBtn.disabled = gameState.score < gameState.upgrades.cursor.cost;
+            buyGrandmaBtn.disabled = gameState.score < gameState.upgrades.grandma.cost;
+            buyFactoryBtn.disabled = gameState.score < gameState.upgrades.factory.cost;
+            buyBoostBtn.disabled = gameState.score < gameState.upgrades.boost.cost || gameState.upgrades.boost.active;
+            
+            // Statut du boost
+            if (gameState.upgrades.boost.active) {
+                boostStatusElement.textContent = `Oui (${gameState.upgrades.boost.timeLeft}s)`;
+                boostStatusElement.style.color = '#ffd700';
+                boostStatusElement.style.fontWeight = 'bold';
+            } else {
+                boostStatusElement.textContent = "Non";
+                boostStatusElement.style.color = '';
+                boostStatusElement.style.fontWeight = '';
+                // Retirer l'animation quand le boost se termine
+                clickButton.style.animation = '';
+            }
+        }
+
+        // Boucle de jeu principale
+        setInterval(() => {
+            // Production automatique (seulement si on a du CPS)
+            if (gameState.cps > 0) {
+                const effectiveCps = gameState.upgrades.boost.active ? 
+                    gameState.cps * 2 : gameState.cps;
+                gameState.score += effectiveCps;
+            }
+            
+            // Gestion du boost
+            if (gameState.upgrades.boost.active) {
+                gameState.upgrades.boost.timeLeft--;
+                if (gameState.upgrades.boost.timeLeft <= 0) {
+                    gameState.upgrades.boost.active = false;
+                }
+            }
+            
+            updateDisplay();
+        }, 1000);
+
+        // Initialisation
+        updateTheme();
+        updateDisplay();
+    </script>
+</body>
+</html>
